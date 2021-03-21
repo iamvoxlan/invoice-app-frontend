@@ -5,6 +5,7 @@ import Register from "./views/register";
 import Invoice from "./views/invoice";
 import Create from "./views/create"
 import Home from "./views/home";
+import Edit from "./views/edit"
 import { Component } from "react";
 import cookie from "react-cookies";
 import { Link, Switch, Route, BrowserRouter as Router } from "react-router-dom";
@@ -26,6 +27,7 @@ class App extends Component {
               {token ? <Home /> : <Login />}
             </Route>
             <Route exact path="/invoice/:id" component={Invoice} />
+            <Route exact path="/edit/:id" component={Edit} />
             <Route exact path="/create">
               <Create />
             </Route>

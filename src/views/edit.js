@@ -1,0 +1,232 @@
+import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import Container from "@material-ui/core/Container";
+import TextField from "@material-ui/core/TextField";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import { FormControl } from "@material-ui/core";
+import InputLabel from "@material-ui/core/InputLabel";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import api from "../utils/api";
+
+class Edit extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      invoice_number: "",
+      invoice_date: "",
+      selectedCustomer: "",
+      name: "",
+      price: 0,
+      qty: 0,
+      customer: [],
+      ordered_items: [],
+    };
+  }
+
+  async componentDidMount() {
+    const id = this.props.match.params.id;
+    const response = await api.get(`invoice/${id}`);
+    console.log(response.data);
+    this.setState({
+        invoice_number: response.data.data.number,
+        invoice_date: response.data.data.date,
+        ordered_items: response.data.data.ordered_item,
+    })
+    const customers = await api.get(`customer/`);
+    this.setState({ customer: customers.data.data });
+    
+  }
+
+  handleSelectedCustomer = (event) => {
+    this.setState({ selectedCustomer: event.target.value });
+  };
+
+  addRow = (item) => {
+    if (item.qty === 0 || item.price === 0 || item.name === "") {
+      alert("Fill empty form");
+    } else {
+      const new_items = this.state.ordered_items;
+      new_items.push(item);
+      this.setState({ ordered_items: new_items });
+      this.setState({ name: "", qty: 0, price: 0 });
+    }
+  };
+
+  editInvoice = (event) => {
+    const id = this.props.match.params.id;
+    event.preventDefault();
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const data = {
+      customer_id: this.state.selectedCustomer,
+      item_list: this.state.ordered_items,
+      number: this.state.invoice_number,
+      date: this.state.invoice_date,
+    };
+    console.log(data);
+    api
+      .put(`invoice/${id}`, data, { headers })
+      .then(function (response) {
+        alert("Edit invoice succeed");
+      })
+      .catch(function (error) {
+        alert("Edit invoice failed");
+      });
+  };
+
+  render() {
+    return (
+      <div>
+        <form>
+          <FormControl>
+            <InputLabel id="demo-simple-select-helper-label">
+              Customer
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              value={this.state.selectedCustomer}
+              onChange={this.handleSelectedCustomer}
+            >
+              {this.state.customer.map((row) => (
+                <MenuItem value={row.id}>{row.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <br />
+          <TextField
+            id="date"
+            label="Date"
+            type="date"
+            defaultValue="2017-05-24"
+            onChange={(e) => this.setState({ invoice_date: e.target.value })}
+            value={this.state.invoice_date}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
+          <br />
+          <TextField
+            required
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="invoice-number"
+            label="Invoice Number"
+            name="invoice-number"
+            autoComplete="invoice-number"
+            autoFocus
+            onChange={(e) => this.setState({ invoice_number: e.target.value })}
+            value={this.state.invoice_number}
+          />
+          <br/>
+          <TableContainer component={Paper}>
+            <Table size="small" aria-label="a dense table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Item Name</TableCell>
+                  <TableCell align="right">Qty</TableCell>
+                  <TableCell align="right">Unit Price</TableCell>
+                  <TableCell align="right">Amount</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {this.state.ordered_items.map((row) => (
+                  <TableRow key={row.name}>
+                    <TableCell component="th" scope="row">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="right">{row.qty}</TableCell>
+                    <TableCell align="right">{row.price}</TableCell>
+                    <TableCell align="right">{row.qty * row.price}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <br />
+          <TextField
+            required
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Item Name"
+            name="name"
+            autoComplete="name"
+            autoFocus
+            onChange={(e) => this.setState({ name: e.target.value })}
+            value={this.state.name}
+          />
+          <TextField
+            required
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="qty"
+            label="Quantity"
+            name="qty"
+            type="number"
+            autoComplete="qty"
+            autoFocus
+            value={this.state.qty}
+            onChange={(e) => this.setState({ qty: e.target.value })}
+          />
+          <TextField
+            required
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="price"
+            label="Price"
+            name="price"
+            type="number"
+            autoComplete="price"
+            autoFocus
+            value={this.state.price}
+            onChange={(e) => this.setState({ price: e.target.value })}
+          />
+          <Button
+            onClick={() =>
+              this.addRow({
+                name: this.state.name,
+                qty: this.state.qty,
+                price: this.state.price,
+              })
+            }
+            fullWidth
+            variant="contained"
+            color="primary"
+          >
+            Add Item
+          </Button>
+          <br />
+          <br />
+          <Button
+            onClick={this.editInvoice}
+            fullWidth
+            variant="contained"
+            color="primary"
+          >
+            Edit Invoice
+          </Button>
+        </form>
+      </div>
+    );
+  }
+}
+
+export default Edit;
