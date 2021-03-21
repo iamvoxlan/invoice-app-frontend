@@ -26,6 +26,14 @@ class Home extends Component {
     window.location = "/";
   };
 
+   deleteInvoice = async (invoice_id) => {
+    const response = api.delete(`invoice/${invoice_id}`);
+    if (response) {
+      const response2 = await api.get("invoice/");
+      this.setState({ data: response2.data.data });
+    }
+  };
+
   async componentDidMount() {
     const response = await api.get("invoice/");
     this.setState({ data: response.data.data });
@@ -66,8 +74,8 @@ class Home extends Component {
                     <Button>
                       <Link to={`/edit/${row.id}`}>Edit</Link>
                     </Button>
-                    <Button>
-                      <Link to={`/delete/${row.id}`}>Delete</Link>
+                    <Button onClick={() => this.deleteInvoice(row.id)}>
+                      Delete
                     </Button>
                   </TableCell>
                 </TableRow>
