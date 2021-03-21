@@ -19,6 +19,8 @@ class Create extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      invoice_number: "",
+      invoice_date: "",
       selectedCustomer: "",
       name: "",
       price: 0,
@@ -49,6 +51,28 @@ class Create extends Component {
     }
   };
 
+  addInvoice = (event) => {
+    event.preventDefault();
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const data = {
+      customer_id: this.state.selectedCustomer,
+      item_list: this.state.ordered_items,
+      number: this.state.invoice_number,
+      date: this.state.invoice_date,
+    };
+    console.log(data);
+    api
+      .post("invoice/", data, { headers })
+      .then(function (response) {
+        alert("Add invoice succeed");
+      })
+      .catch(function (error) {
+        alert("Add invoice failed");
+      });
+  };
+
   render() {
     return (
       <div>
@@ -68,6 +92,35 @@ class Create extends Component {
               ))}
             </Select>
           </FormControl>
+          <br />
+          <TextField
+            id="date"
+            label="Date"
+            type="date"
+            defaultValue="2017-05-24"
+            onChange={(e) => this.setState({ invoice_date: e.target.value })}
+            value={this.state.invoice_date}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
+          <br />
+          <TextField
+            required
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="invoice-number"
+            label="Invoice Number"
+            name="invoice-number"
+            autoComplete="invoice-number"
+            autoFocus
+            onChange={(e) => this.setState({ invoice_number: e.target.value })}
+            value={this.state.invoice_number}
+          />
+          <br/>
           <TableContainer component={Paper}>
             <Table size="small" aria-label="a dense table">
               <TableHead>
@@ -150,6 +203,16 @@ class Create extends Component {
             color="primary"
           >
             Add Item
+          </Button>
+          <br />
+          <br />
+          <Button
+            onClick={this.addInvoice}
+            fullWidth
+            variant="contained"
+            color="primary"
+          >
+            Add Invoice
           </Button>
         </form>
       </div>
