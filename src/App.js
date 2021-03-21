@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import Login from "./views/login";
+import Register from "./views/register";
+import Invoice from "./views/invoice";
+import Create from "./views/create"
+import Home from "./views/home";
+import { Component } from "react";
+import cookie from "react-cookies";
+import { Link, Switch, Route, BrowserRouter as Router } from "react-router-dom";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  render() {
+    const token = cookie.load("token");
+    return (
+      <Router>
+        <div>
+          <Switch>
+            <Route exact path="/login">
+              <Login />
+            </Route>
+            <Route exact path="/register">
+              <Register />
+            </Route>
+            <Route exact path="/">
+              {token ? <Home /> : <Login />}
+            </Route>
+            <Route exact path="/invoice/:id" component={Invoice} />
+            <Route exact path="/create">
+              <Create />
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    );
+  }
 }
 
 export default App;
